@@ -1,0 +1,158 @@
+:root {
+  --color-white: #fff;
+  --color-table: #fff;
+  --color-title-table: #ffffff;
+  --color-table: #0058c5;
+  --color-highlight: #ffffcc;
+  --color-highlight-green: #ccffcc;
+  --color-highlight-red: #ffcccc;
+  --color-highlight-all: #cccfff;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.painel {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
+  width: 100%;
+  padding: 1.2rem;
+  position: relative;
+}
+
+.top {
+  padding: 10px;
+  height: 20vh;
+}
+
+.tabela {
+  border-collapse: collapse;
+  width: 100%;
+  border: none;
+  table-layout: fixed;
+}
+
+.tabela thead {
+  display: table;
+  width: 100%;
+}
+
+.tabela tbody {
+  display: block;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.tabela-titulos {
+  text-align: center;
+  background-color: var(--color-table);
+  color: var(--color-title-table);
+}
+
+.tabela-titulos .titulo {
+  min-width: 120px;
+  padding: 5px;
+  text-align: center;
+}
+
+.info-tabela .info {
+  text-align: center;
+}
+
+.tabela td, .tabela th {
+  padding: 8px;
+  text-align: left;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+}
+
+.tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.tabela thead, .tabela tbody tr {
+  display: table;
+  width: 100%;
+}
+
+.tabela thead {
+  display: table;
+  width: calc(100% - 1em);
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #ddd;
+}
+
+.tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+.highlight {
+  background-color: var(--color-highlight) !important;
+}
+
+.highlight-green {
+  background-color: var(--color-highlight-green) !important;
+}
+
+.highlight-red {
+  background-color: var(--color-highlight-red) !important;
+}
+
+.filter{
+  display: flex;
+
+}
+
+.filter div{
+  margin: 10px;
+  cursor: pointer;
+  border-radius: .25rem;
+}
+
+.filter .almoco{
+  padding: 10px;
+  background-color: var(--color-highlight);
+}
+
+.filter .extra{
+  padding: 10px;
+  background-color: var(--color-highlight-green);
+}
+
+.filter .ponto{
+  padding: 10px;
+  background-color: var(--color-highlight-red);
+}
+
+.filter .all {
+  padding: 10px;
+  background-color: var(--color-highlight-all);
+}

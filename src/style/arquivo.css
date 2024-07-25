@@ -1,0 +1,10 @@
+.arquivo{
+    cursor: pointer;
+    background-color: #04ca28;
+    color:#fff;
+    padding: 10px;
+    border-radius: .25rem;
+}
+.arquivo input{
+    display: none;
+}
