@@ -20,7 +20,7 @@ function App() {
   const processFileContent = (content) => {
     const lines = content.split('\n').filter(line => line.trim() !== '');
     const recordsByPis = {};
-  
+
     lines.forEach((line, index) => {
       if (index === 0) {
         // Title extraction
@@ -35,17 +35,17 @@ function App() {
         const idWithMessage = line.slice(22, 55).trim();
         const message = line.slice(55).trim();
         const id = idWithMessage;
-  
+
         const dateKey = `${line.slice(10, 12)}/${line.slice(12, 14)}/${line.slice(14, 18)}`;
-  
+
         if (!recordsByPis[pis]) {
           recordsByPis[pis] = {};
         }
-  
+
         if (!recordsByPis[pis][dateKey]) {
           recordsByPis[pis][dateKey] = [];
         }
-  
+
         recordsByPis[pis][dateKey].push({
           pis,
           data: dataFormatada,
@@ -55,9 +55,9 @@ function App() {
         });
       }
     });
-  
+
     const groupedData = [];
-  
+
     Object.keys(recordsByPis).forEach(pis => {
       const recordsByDate = recordsByPis[pis];
       Object.keys(recordsByDate).forEach(dateKey => {
@@ -65,33 +65,33 @@ function App() {
         const requiredIds = ['E01O', 'S01O', 'E02O', 'S02O'];
         const recordIds = records.map(record => record.id.slice(-4));
         const missing = requiredIds.filter(id => !recordIds.includes(id));
-        
+
         const entrada1 = records.find(r => typeof r.id === 'string' && r.id.endsWith('E01O'));
         const saida1 = records.find(r => typeof r.id === 'string' && r.id.endsWith('S01O'));
         const entrada2 = records.find(r => typeof r.id === 'string' && r.id.endsWith('E02O'));
         const saida2 = records.find(r => typeof r.id === 'string' && r.id.endsWith('S02O'));
         const duplicatas = records.filter(r => r.id.endsWith('D00O'));
-  
+
         let intervaloAlmocoMinutos = 0;
         let tempoTrabalhoTotal = 0;
-  
+
         if (entrada1 && saida1 && entrada2 && saida2) {
           const toMinutes = (time) => {
             const [hrs, mins] = time.split(':').map(Number);
             return hrs * 60 + mins;
           };
-  
+
           const entrada1Minutos = toMinutes(entrada1.horario);
           const saida1Minutos = toMinutes(saida1.horario);
           const entrada2Minutos = toMinutes(entrada2.horario);
           const saida2Minutos = toMinutes(saida2.horario);
-  
+
           intervaloAlmocoMinutos = entrada2Minutos - saida1Minutos;
           tempoTrabalhoTotal = (saida1Minutos - entrada1Minutos) + (saida2Minutos - entrada2Minutos);
-  
+
           const limite = 70; // 70 minutos
           const intervaloExcedente = Math.max(0, intervaloAlmocoMinutos - limite);
-  
+
           groupedData.push({
             pis,
             date: dateKey,
@@ -121,10 +121,10 @@ function App() {
         }
       });
     });
-  
+
     setParsedData(groupedData);
   };
-  
+
   const formatTime = (minutes) => {
     if (isNaN(minutes)) return '00:00';
     const hrs = Math.floor(minutes / 60);
@@ -136,14 +136,14 @@ function App() {
     setFilter(filterType);
   };
 
-  
+
   // Filtra os dados com base na categoria selecionada
   const filteredData = parsedData.filter(item => {
     if (filter === 'almoco') {
       return item.intervaloAlmocoMinutos > 70;
     }
     if (filter === 'extra') {
-      return item.tempoTrabalhoTotal > 550;
+      return item.tempoTrabalhoTotal > 600;
     }
     if (filter === 'ponto') {
       return item.missingRecords;
@@ -157,25 +157,25 @@ function App() {
         <div className="top">
           <div className="info-buttom">
             <div className="filter">
-            <div 
+              <div
                 className={`almoco ${filter === 'almoco' ? 'selected' : ''}`}
                 onClick={() => handleFilterChange('almoco')}
               >
                 Tempo de almoço
               </div>
-              <div 
+              <div
                 className={`extra ${filter === 'extra' ? 'selected' : ''}`}
                 onClick={() => handleFilterChange('extra')}
               >
                 Horas extras
               </div>
-              <div 
+              <div
                 className={`ponto ${filter === 'ponto' ? 'selected' : ''}`}
                 onClick={() => handleFilterChange('ponto')}
               >
                 Falta Ponto
               </div>
-              <div 
+              <div
                 className={`all ${filter === '' ? 'selected' : ''}`}
                 onClick={() => handleFilterChange('')}
               >
@@ -184,56 +184,56 @@ function App() {
             </div>
 
             <label htmlFor="arquivo" className="arquivo">
-                Selecione o arquivo
-                <input
-                  id="arquivo"
-                  type="file"
-                  accept=".txt"
-                  onChange={(e) => handleFileChosen(e.target.files[0])}
-                />
-              </label>
+              Selecione o arquivo
+              <input
+                id="arquivo"
+                type="file"
+                accept=".txt"
+                onChange={(e) => handleFileChosen(e.target.files[0])}
+              />
+            </label>
           </div>
         </div>
         <table className="tabela">
-  <thead>
-    <tr className="tabela-titulos">
-      <td className="titulo">PIS</td>
-      <td className="titulo">Data</td>
-      <td className="titulo">Entrada 1</td>
-      <td className="titulo">Saída 1</td>
-      <td className="titulo">Entrada 2</td>
-      <td className="titulo">Saída 2</td>
-      <td className="titulo">Tempo de almoço</td>
-      <td className="titulo">Horas trabalhado</td>
-      <td></td>
-    </tr>
-  </thead>
-  <tbody className="tbody">
-    {filteredData.map((item, index) => (
-      <tr
-        className={`info-tabela
+          <thead>
+            <tr className="tabela-titulos">
+              <td className="titulo">PIS</td>
+              <td className="titulo">Data</td>
+              <td className="titulo">Entrada 1</td>
+              <td className="titulo">Saída 1</td>
+              <td className="titulo">Entrada 2</td>
+              <td className="titulo">Saída 2</td>
+              <td className="titulo">Tempo de almoço</td>
+              <td className="titulo">Horas trabalhado</td>
+              <td></td>
+            </tr>
+          </thead>
+          <tbody className="tbody">
+            {filteredData.map((item, index) => (
+              <tr
+                className={`info-tabela
           ${item.missingRecords ? 'highlight-red' : ''}
           ${item.intervaloAlmocoMinutos > 70 ? 'highlight' : ''}
-          ${item.tempoTrabalhoTotal > 550 ? 'highlight-green' : ''}
+          ${item.tempoTrabalhoTotal > 600 ? 'highlight-green' : ''}
           ${(!item.records.find(record => record.id.endsWith('E01O')) ||
-            !item.records.find(record => record.id.endsWith('S01O')) ||
-            !item.records.find(record => record.id.endsWith('E02O')) ||
-            !item.records.find(record => record.id.endsWith('S02O'))) ? 'highlight-missing' : ''}
+                    !item.records.find(record => record.id.endsWith('S01O')) ||
+                    !item.records.find(record => record.id.endsWith('E02O')) ||
+                    !item.records.find(record => record.id.endsWith('S02O'))) ? 'highlight-missing' : ''}
         `}
-        key={index}
-      >
-        <td className="info">{item.pis}</td>
-        <td className="info">{item.date}</td>
-        <td className="info">{item.records.find(record => record.id.endsWith('E01O'))?.horario || ''}</td>
-        <td className="info">{item.records.find(record => record.id.endsWith('S01O'))?.horario || ''}</td>
-        <td className="info">{item.records.find(record => record.id.endsWith('E02O'))?.horario || ''}</td>
-        <td className="info">{item.records.find(record => record.id.endsWith('S02O'))?.horario || ''}</td>
-        <td className="info">{formatTime(item.intervaloAlmocoMinutos)}</td>
-        <td className="info">{formatTime(item.tempoTrabalhoTotal)}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+                key={index}
+              >
+                <td className="info">{item.pis}</td>
+                <td className="info">{item.date}</td>
+                <td className="info">{item.records.find(record => record.id.endsWith('E01O'))?.horario || ''}</td>
+                <td className="info">{item.records.find(record => record.id.endsWith('S01O'))?.horario || ''}</td>
+                <td className="info">{item.records.find(record => record.id.endsWith('E02O'))?.horario || ''}</td>
+                <td className="info">{item.records.find(record => record.id.endsWith('S02O'))?.horario || ''}</td>
+                <td className="info">{formatTime(item.intervaloAlmocoMinutos)}</td>
+                <td className="info">{formatTime(item.tempoTrabalhoTotal)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
       </div>
     </div>
