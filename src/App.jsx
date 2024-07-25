@@ -3,10 +3,7 @@ import React, { useState } from 'react';
 function App() {
   const [fileContent, setFileContent] = useState('');
   const [parsedData, setParsedData] = useState([]);
-  const [missingRecords, setMissingRecords] = useState([]);
-  const [intervalIssues, setIntervalIssues] = useState([]);
   const [filter, setFilter] = useState('');
-  const EXTRA_LIMIT = 10;
 
   const handleFileRead = (event) => {
     const content = event.target.result;
