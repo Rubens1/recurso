@@ -205,6 +205,7 @@ function App() {
       <td className="titulo">Saída 2</td>
       <td className="titulo">Tempo de almoço</td>
       <td className="titulo">Horas trabalhado</td>
+      <td></td>
     </tr>
   </thead>
   <tbody className="tbody">
