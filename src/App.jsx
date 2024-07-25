@@ -158,40 +158,43 @@ function App() {
     <div className="painel">
       <div className="container">
         <div className="top">
-          <label htmlFor="arquivo" className="arquivo">
-            Selecione o arquivo
-            <input
-              id="arquivo"
-              type="file"
-              accept=".txt"
-              onChange={(e) => handleFileChosen(e.target.files[0])}
-            />
-          </label>
-        </div>
-        <div className="filter">
-        <div 
-            className={`almoco ${filter === 'almoco' ? 'selected' : ''}`}
-            onClick={() => handleFilterChange('almoco')}
-          >
-            Tempo de almoço
-          </div>
-          <div 
-            className={`extra ${filter === 'extra' ? 'selected' : ''}`}
-            onClick={() => handleFilterChange('extra')}
-          >
-            Horas extras
-          </div>
-          <div 
-            className={`ponto ${filter === 'ponto' ? 'selected' : ''}`}
-            onClick={() => handleFilterChange('ponto')}
-          >
-            Falta Ponto
-          </div>
-          <div 
-            className={`all ${filter === '' ? 'selected' : ''}`}
-            onClick={() => handleFilterChange('')}
-          >
-            Todos
+          <div className="info-buttom">
+            <div className="filter">
+            <div 
+                className={`almoco ${filter === 'almoco' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('almoco')}
+              >
+                Tempo de almoço
+              </div>
+              <div 
+                className={`extra ${filter === 'extra' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('extra')}
+              >
+                Horas extras
+              </div>
+              <div 
+                className={`ponto ${filter === 'ponto' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('ponto')}
+              >
+                Falta Ponto
+              </div>
+              <div 
+                className={`all ${filter === '' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('')}
+              >
+                Todos
+              </div>
+            </div>
+
+            <label htmlFor="arquivo" className="arquivo">
+                Selecione o arquivo
+                <input
+                  id="arquivo"
+                  type="file"
+                  accept=".txt"
+                  onChange={(e) => handleFileChosen(e.target.files[0])}
+                />
+              </label>
           </div>
         </div>
         <table className="tabela">

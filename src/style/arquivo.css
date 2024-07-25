@@ -4,6 +4,7 @@
     color:#fff;
     padding: 10px;
     border-radius: .25rem;
+    height: 40px;
 }
 .arquivo input{
     display: none;

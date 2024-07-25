@@ -47,6 +47,17 @@ code {
 .top {
   padding: 10px;
   height: 20vh;
+  display: flex;
+
+
+}
+
+.info-buttom{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .tabela {
@@ -128,7 +139,7 @@ tbody tr:nth-child(odd) {
 
 .filter{
   display: flex;
-
+  height: 60px;
 }
 
 .filter div{
