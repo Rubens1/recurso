@@ -23,12 +23,10 @@ function App() {
 
     lines.forEach((line, index) => {
       if (index === 0) {
-        // Title extraction
         const titleMatch = line.match(/[A-Z\s]+/);
         const title = titleMatch ? titleMatch[0].trim() : '';
         setParsedData(prevData => [...prevData, { title }]);
       } else {
-        // Record extraction
         const pis = line.slice(23, 34).trim();
         const dataFormatada = `${line.slice(10, 12)}/${line.slice(12, 14)}/${line.slice(14, 18)}`;
         const horario = `${line.slice(18, 20)}:${line.slice(20, 22)}`;
@@ -89,7 +87,7 @@ function App() {
           intervaloAlmocoMinutos = entrada2Minutos - saida1Minutos;
           tempoTrabalhoTotal = (saida1Minutos - entrada1Minutos) + (saida2Minutos - entrada2Minutos);
 
-          const limite = 70; // 70 minutos
+          const limite = 70;
           const intervaloExcedente = Math.max(0, intervaloAlmocoMinutos - limite);
 
           groupedData.push({
@@ -137,7 +135,6 @@ function App() {
   };
 
 
-  // Filtra os dados com base na categoria selecionada
   const filteredData = parsedData.filter(item => {
     if (filter === 'almoco') {
       return item.intervaloAlmocoMinutos > 70;
@@ -148,7 +145,7 @@ function App() {
     if (filter === 'ponto') {
       return item.missingRecords;
     }
-    return true; // Retorna todos os dados se nenhum filtro estiver selecionado
+    return true;
   });
 
   return (
@@ -212,14 +209,14 @@ function App() {
             {filteredData.map((item, index) => (
               <tr
                 className={`info-tabela
-          ${item.missingRecords ? 'highlight-red' : ''}
-          ${item.intervaloAlmocoMinutos > 70 ? 'highlight' : ''}
-          ${item.tempoTrabalhoTotal > 600 ? 'highlight-green' : ''}
-          ${(!item.records.find(record => record.id.endsWith('E01O')) ||
-                    !item.records.find(record => record.id.endsWith('S01O')) ||
-                    !item.records.find(record => record.id.endsWith('E02O')) ||
-                    !item.records.find(record => record.id.endsWith('S02O'))) ? 'highlight-missing' : ''}
-        `}
+                  ${item.missingRecords ? 'highlight-red' : ''}
+                  ${item.intervaloAlmocoMinutos > 70 ? 'highlight' : ''}
+                  ${item.tempoTrabalhoTotal > 600 ? 'highlight-green' : ''}
+                  ${(!item.records.find(record => record.id.endsWith('E01O')) ||
+                            !item.records.find(record => record.id.endsWith('S01O')) ||
+                            !item.records.find(record => record.id.endsWith('E02O')) ||
+                            !item.records.find(record => record.id.endsWith('S02O'))) ? 'highlight-missing' : ''}
+                `}
                 key={index}
               >
                 <td className="info">{item.pis}</td>

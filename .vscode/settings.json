@@ -1,0 +1,12 @@
+{
+    "editor.quickSuggestions": {
+        "other": false,
+        "comments": false,
+        "strings": false
+    },
+    "editor.fontLigatures": false,
+    "editor.hover.enabled": false,
+    "editor.parameterHints.enabled": false,
+    "javascript.validate.enable": false
+
+}
