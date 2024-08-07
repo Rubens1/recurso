@@ -147,7 +147,6 @@ function App() {
     }
     return true;
   });
-
   return (
     <div className="painel">
       <div className="container">
@@ -202,6 +201,7 @@ function App() {
               <td className="titulo">Saída 2</td>
               <td className="titulo">Tempo de almoço</td>
               <td className="titulo">Horas trabalhado</td>
+              <td className="titulo">Observação</td>
               <td></td>
             </tr>
           </thead>
@@ -227,6 +227,8 @@ function App() {
                 <td className="info">{item.records.find(record => record.id.endsWith('S02O'))?.horario || ''}</td>
                 <td className="info">{formatTime(item.intervaloAlmocoMinutos)}</td>
                 <td className="info">{formatTime(item.tempoTrabalhoTotal)}</td>
+                <td className="info">{item.duplicatas.map((itens) => (<span>{itens.horario}: {itens.message} <br></br></span>))}</td>
+                
               </tr>
             ))}
           </tbody>
