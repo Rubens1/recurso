@@ -4,7 +4,7 @@
         "comments": false,
         "strings": false
     },
-    "editor.fontLigatures": false,
+    "editor.fontLigatures": true,
     "editor.hover.enabled": false,
     "editor.parameterHints.enabled": false,
     "javascript.validate.enable": false

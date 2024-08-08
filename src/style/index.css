@@ -6,7 +6,9 @@
   --color-highlight: #ffffcc;
   --color-highlight-green: #ccffcc;
   --color-highlight-red: #ffcccc;
-  --color-highlight-all: #cccfff;
+  --color-highlight-all: #ccfff3;
+  --color-highlight-blue: #cce3ff;
+  --color-highlight-alert: #d6ccff;
 }
 
 * {
@@ -139,6 +141,13 @@ tbody tr:nth-child(odd) {
   background-color: var(--color-highlight-red) !important;
 }
 
+.highlight-blue {
+  background-color: var(--color-highlight-blue) !important;
+}
+
+.highlight-alert {
+  background-color: var(--color-highlight-alert) !important;
+}
 .filter{
   display: flex;
   height: 60px;
@@ -152,12 +161,21 @@ tbody tr:nth-child(odd) {
 
 .filter .almoco{
   padding: 10px;
-  background-color: var(--color-highlight);
+  background-color: var(--color-highlight-blue);
 }
 
 .filter .extra{
   padding: 10px;
   background-color: var(--color-highlight-green);
+}
+.filter .negativo{
+  padding: 10px;
+  background-color: var(--color-highlight-alert);
+}
+
+.filter .mais-extra{
+  padding: 10px;
+  background-color: var(--color-highlight);
 }
 
 .filter .ponto{
@@ -168,4 +186,12 @@ tbody tr:nth-child(odd) {
 .filter .all {
   padding: 10px;
   background-color: var(--color-highlight-all);
+}
+.body_load{
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index:99;
+  position: absolute;
 }

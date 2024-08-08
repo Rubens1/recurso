@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Loading from './Components/Loading';
 
 function App() {
   const [fileContent, setFileContent] = useState('');
   const [parsedData, setParsedData] = useState([]);
   const [filter, setFilter] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleFileRead = (event) => {
     const content = event.target.result;
@@ -12,6 +14,12 @@ function App() {
   };
 
   const handleFileChosen = (file) => {
+    if (!file) {
+      setLoading(false);
+      return;
+    }
+  
+    setLoading(true);
     const fileReader = new FileReader();
     fileReader.onloadend = handleFileRead;
     fileReader.readAsText(file);
@@ -44,6 +52,7 @@ function App() {
           recordsByPis[pis][dateKey] = [];
         }
 
+        
         recordsByPis[pis][dateKey].push({
           pis,
           data: dataFormatada,
@@ -53,9 +62,8 @@ function App() {
         });
       }
     });
-
+    
     const groupedData = [];
-
     Object.keys(recordsByPis).forEach(pis => {
       const recordsByDate = recordsByPis[pis];
       Object.keys(recordsByDate).forEach(dateKey => {
@@ -63,12 +71,18 @@ function App() {
         const requiredIds = ['E01O', 'S01O', 'E02O', 'S02O'];
         const recordIds = records.map(record => record.id.slice(-4));
         const missing = requiredIds.filter(id => !recordIds.includes(id));
-
+        
+        const dateParts = dateKey.split('/');
+        const dateObject = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+        const isFriday = dateObject.getDay() === 5; // 5 representa sexta-feira
+        
         const entrada1 = records.find(r => typeof r.id === 'string' && r.id.endsWith('E01O'));
         const saida1 = records.find(r => typeof r.id === 'string' && r.id.endsWith('S01O'));
         const entrada2 = records.find(r => typeof r.id === 'string' && r.id.endsWith('E02O'));
         const saida2 = records.find(r => typeof r.id === 'string' && r.id.endsWith('S02O'));
-        const duplicatas = records.filter(r => r.id.endsWith('D00O'));
+        const duplicatas = records.filter(r => typeof r.id === 'string' && r.id.endsWith('D00O'));
+        const entradaSaida1 = records.filter(r => typeof r.id === 'string' && r.id.endsWith('D01O'));
+        const entradaSaida2 = records.filter(r => typeof r.id === 'string' && r.id.endsWith('D02O'));
 
         let intervaloAlmocoMinutos = 0;
         let tempoTrabalhoTotal = 0;
@@ -103,7 +117,10 @@ function App() {
             intervaloExcedente,
             tempoTrabalhoTotal,
             duplicatas,
-            missingRecords: missing.length > 0
+            entradaSaida1,
+            entradaSaida2,
+            missingRecords: missing.length > 0,
+            isFriday
           });
         } else {
           groupedData.push({
@@ -114,9 +131,13 @@ function App() {
             intervaloExcedente: 0,
             tempoTrabalhoTotal: 0,
             duplicatas: duplicatas,
-            missingRecords: missing.length > 0
+            entradaSaida1: entradaSaida1,
+            entradaSaida2: entradaSaida2,
+            missingRecords: missing.length > 0,
+            isFriday
           });
         }
+        setLoading(false);
       });
     });
 
@@ -131,24 +152,38 @@ function App() {
   };
 
   const handleFilterChange = (filterType) => {
-    setFilter(filterType);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setFilter(filterType);
+  }, 1000);
+
   };
 
 
   const filteredData = parsedData.filter(item => {
+    
     if (filter === 'almoco') {
       return item.intervaloAlmocoMinutos > 70;
     }
     if (filter === 'extra') {
+      return item.tempoTrabalhoTotal > 550;
+    }
+    if (filter === 'mais-extra') {
       return item.tempoTrabalhoTotal > 600;
     }
     if (filter === 'ponto') {
       return item.missingRecords;
     }
+    if (filter === 'negativo') {
+      return item.tempoTrabalhoTotal < 480;
+    }
     return true;
   });
+
   return (
     <div className="painel">
+      {loading ? <Loading /> : <></>}
       <div className="container">
         <div className="top">
           <div className="info-buttom">
@@ -166,10 +201,22 @@ function App() {
                 Horas extras
               </div>
               <div
+                className={`mais-extra ${filter === 'mais-extra' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('mais-extra')}
+              >
+                Mais que extras
+              </div>
+              <div
                 className={`ponto ${filter === 'ponto' ? 'selected' : ''}`}
                 onClick={() => handleFilterChange('ponto')}
               >
-                Falta Ponto
+                Falta ponto
+              </div>
+              <div
+                className={`negativo ${filter === 'negativo' ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('negativo')}
+              >
+                Horas negativas
               </div>
               <div
                 className={`all ${filter === '' ? 'selected' : ''}`}
@@ -210,24 +257,46 @@ function App() {
               <tr
                 className={`info-tabela
                   ${item.missingRecords ? 'highlight-red' : ''}
-                  ${item.intervaloAlmocoMinutos > 70 ? 'highlight' : ''}
-                  ${item.tempoTrabalhoTotal > 600 ? 'highlight-green' : ''}
+                  ${item.intervaloAlmocoMinutos > 70 ? 'highlight-blue' : ''}
+                  ${item.tempoTrabalhoTotal > 600 ? 'highlight' : ''}
+                  ${item.tempoTrabalhoTotal > 550 &&  item.tempoTrabalhoTotal < 600 ? 'highlight-green' : ''}
+                  ${item.isFriday && item.tempoTrabalhoTotal > 480 ? 'highlight' : ''}
+                  ${item.isFriday && item.tempoTrabalhoTotal > 480 && item.tempoTrabalhoTotal <= 540 ? 'highlight-green' : ''}
+                  ${!item.isFriday && item.tempoTrabalhoTotal > 600 ? 'highlight' : ''}
+                  ${!item.isFriday && item.tempoTrabalhoTotal > 550 && item.tempoTrabalhoTotal <= 600 ? 'highlight-green' : ''}
+                 
                   ${(!item.records.find(record => record.id.endsWith('E01O')) ||
-                            !item.records.find(record => record.id.endsWith('S01O')) ||
-                            !item.records.find(record => record.id.endsWith('E02O')) ||
-                            !item.records.find(record => record.id.endsWith('S02O'))) ? 'highlight-missing' : ''}
+                     !item.records.find(record => record.id.endsWith('S01O')) ||
+                     !item.records.find(record => record.id.endsWith('E02O')) ||
+                     !item.records.find(record => record.id.endsWith('S02O'))) ? 'highlight-missing' : ''}
                 `}
                 key={index}
               >
                 <td className="info">{item.pis}</td>
                 <td className="info">{item.date}</td>
-                <td className="info">{item.records.find(record => record.id.endsWith('E01O'))?.horario || ''}</td>
-                <td className="info">{item.records.find(record => record.id.endsWith('S01O'))?.horario || ''}</td>
-                <td className="info">{item.records.find(record => record.id.endsWith('E02O'))?.horario || ''}</td>
-                <td className="info">{item.records.find(record => record.id.endsWith('S02O'))?.horario || ''}</td>
+                <td className="info">
+                  {item.records.find(record => record.id.endsWith('E01O'))?.horario || ''}
+                  {item.records.find(record => record.id.endsWith('D01O'))?.horario || ''}
+                </td>
+                <td className="info">
+                  {item.records.find(record => record.id.endsWith('S01O'))?.horario || ''}
+                </td>
+                <td className="info">
+                  {item.records.find(record => record.id.endsWith('E02O'))?.horario || ''}
+                  {item.records.find(record => record.id.endsWith('D02O'))?.horario || ''}
+
+                </td>
+                <td className="info">
+                  {item.records.find(record => record.id.endsWith('S02O'))?.horario || ''}
+
+                </td>
                 <td className="info">{formatTime(item.intervaloAlmocoMinutos)}</td>
                 <td className="info">{formatTime(item.tempoTrabalhoTotal)}</td>
-                <td className="info">{item.duplicatas.map((itens) => (<span>{itens.horario}: {itens.message} <br></br></span>))}</td>
+                <td className="info">
+                  {item.duplicatas.map((itens) => (<span>{itens.horario} - {itens.message} <br></br></span>))}
+                  {item.entradaSaida1.map((itens) => (<span>{itens.horario} - {itens.message} <br></br></span>))}
+                  {item.entradaSaida2.map((itens) => (<span>{itens.horario} - {itens.message} <br></br></span>))}
+                  </td>
                 
               </tr>
             ))}
