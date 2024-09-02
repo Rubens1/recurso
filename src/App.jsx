@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Loading from './Components/Loading';
 
 function App() {
-  const [fileContent, setFileContent] = useState('');
   const [parsedData, setParsedData] = useState([]);
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleFileRead = (event) => {
     const content = event.target.result;
-    setFileContent(content);
     processFileContent(content);
   };
 
@@ -30,119 +28,132 @@ function App() {
     const recordsByPis = {};
 
     lines.forEach((line, index) => {
-      if (index === 0) {
-        const titleMatch = line.match(/[A-Z\s]+/);
-        const title = titleMatch ? titleMatch[0].trim() : '';
-        setParsedData(prevData => [...prevData, { title }]);
-      } else {
-        const pis = line.slice(23, 34).trim();
-        const dataFormatada = `${line.slice(10, 12)}/${line.slice(12, 14)}/${line.slice(14, 18)}`;
-        const horario = `${line.slice(18, 20)}:${line.slice(20, 22)}`;
-        const idWithMessage = line.slice(22, 55).trim();
-        const message = line.slice(55).trim();
-        const id = idWithMessage;
+        if (index === 0) {
+            const titleMatch = line.match(/[A-Z\s]+/);
+            const title = titleMatch ? titleMatch[0].trim() : '';
+            setParsedData(prevData => [...prevData, { title }]);
+        } else {
+            const pis = line.slice(23, 34).trim();
+            const dataFormatada = `${line.slice(10, 12)}/${line.slice(12, 14)}/${line.slice(14, 18)}`;
+            const horario = `${line.slice(18, 20)}:${line.slice(20, 22)}`;
+            const idWithMessage = line.slice(22, 55).trim();
+            const message = line.slice(55).trim();
+            const id = idWithMessage;
 
-        const dateKey = `${line.slice(10, 12)}/${line.slice(12, 14)}/${line.slice(14, 18)}`;
+            const dateKey = `${line.slice(10, 12)}/${line.slice(12, 14)}/${line.slice(14, 18)}`;
 
-        if (!recordsByPis[pis]) {
-          recordsByPis[pis] = {};
+            if (!recordsByPis[pis]) {
+                recordsByPis[pis] = {};
+            }
+
+            if (!recordsByPis[pis][dateKey]) {
+                recordsByPis[pis][dateKey] = [];
+            }
+
+            recordsByPis[pis][dateKey].push({
+                pis,
+                data: dataFormatada,
+                horario,
+                id,
+                message,
+            });
         }
-
-        if (!recordsByPis[pis][dateKey]) {
-          recordsByPis[pis][dateKey] = [];
-        }
-
-        
-        recordsByPis[pis][dateKey].push({
-          pis,
-          data: dataFormatada,
-          horario,
-          id,
-          message,
-        });
-      }
     });
-    
+
     const groupedData = [];
     Object.keys(recordsByPis).forEach(pis => {
-      const recordsByDate = recordsByPis[pis];
-      Object.keys(recordsByDate).forEach(dateKey => {
-        const records = recordsByDate[dateKey];
-        const requiredIds = ['E01O', 'S01O', 'E02O', 'S02O'];
-        const recordIds = records.map(record => record.id.slice(-4));
-        const missing = requiredIds.filter(id => !recordIds.includes(id));
-        
-        const dateParts = dateKey.split('/');
-        const dateObject = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-        const isFriday = dateObject.getDay() === 5; // 5 representa sexta-feira
-        
-        const entrada1 = records.find(r => typeof r.id === 'string' && r.id.endsWith('E01O'));
-        const saida1 = records.find(r => typeof r.id === 'string' && r.id.endsWith('S01O'));
-        const entrada2 = records.find(r => typeof r.id === 'string' && r.id.endsWith('E02O'));
-        const saida2 = records.find(r => typeof r.id === 'string' && r.id.endsWith('S02O'));
-        const duplicatas = records.filter(r => typeof r.id === 'string' && r.id.endsWith('D00O'));
-        const entradaSaida1 = records.filter(r => typeof r.id === 'string' && r.id.endsWith('D01O'));
-        const entradaSaida2 = records.filter(r => typeof r.id === 'string' && r.id.endsWith('D02O'));
+        const recordsByDate = recordsByPis[pis];
+        Object.keys(recordsByDate).forEach(dateKey => {
+            const records = recordsByDate[dateKey];
+            const requiredIds = ['E01O', 'S01O', 'E02O', 'S02O'];
+            const recordIds = records.map(record => record.id.slice(-4));
+            const missing = requiredIds.filter(id => !recordIds.includes(id));
 
-        let intervaloAlmocoMinutos = 0;
-        let tempoTrabalhoTotal = 0;
+            // Corrigir o formato da data para YYYY-MM-DD
+            const [day, month, year] = dateKey.split('/');
+            const dateObject = new Date(year, month - 1, day); // mês é zero-indexado
 
-        if (entrada1 && saida1 && entrada2 && saida2) {
-          const toMinutes = (time) => {
-            const [hrs, mins] = time.split(':').map(Number);
-            return hrs * 60 + mins;
-          };
+            const daysOfWeek = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+            const dayOfWeek = daysOfWeek[dateObject.getDay()];
+            const isFriday = dateObject.getDay() === 5; // 5 representa sexta-feira
 
-          const entrada1Minutos = toMinutes(entrada1.horario);
-          const saida1Minutos = toMinutes(saida1.horario);
-          const entrada2Minutos = toMinutes(entrada2.horario);
-          const saida2Minutos = toMinutes(saida2.horario);
+            const entrada1 = records.find(r => typeof r.id === 'string' && r.id.endsWith('E01O'));
+            const saida1 = records.find(r => typeof r.id === 'string' && r.id.endsWith('S01O'));
+            const entrada2 = records.find(r => typeof r.id === 'string' && r.id.endsWith('E02O'));
+            const saida2 = records.find(r => typeof r.id === 'string' && r.id.endsWith('S02O'));
+            const duplicatas = records.filter(r => typeof r.id === 'string' && r.id.endsWith('D00O'));
+            const entradaSaida1 = records.filter(r => typeof r.id === 'string' && r.id.endsWith('D01O'));
+            const entradaSaida2 = records.filter(r => typeof r.id === 'string' && r.id.endsWith('D02O'));
 
-          intervaloAlmocoMinutos = entrada2Minutos - saida1Minutos;
-          tempoTrabalhoTotal = (saida1Minutos - entrada1Minutos) + (saida2Minutos - entrada2Minutos);
+            let intervaloAlmocoMinutos = 0;
+            let tempoTrabalhoTotal = 0;
 
-          const limite = 70;
-          const intervaloExcedente = Math.max(0, intervaloAlmocoMinutos - limite);
+            if (entrada1 && saida1 && entrada2 && saida2) {
+                const toMinutes = (time) => {
+                    const [hrs, mins] = time.split(':').map(Number);
+                    return hrs * 60 + mins;
+                };
 
-          groupedData.push({
-            pis,
-            date: dateKey,
-            records: [
-              entrada1,
-              saida1,
-              entrada2,
-              saida2
-            ],
-            intervaloAlmocoMinutos,
-            intervaloExcedente,
-            tempoTrabalhoTotal,
-            duplicatas,
-            entradaSaida1,
-            entradaSaida2,
-            missingRecords: missing.length > 0,
-            isFriday
-          });
-        } else {
-          groupedData.push({
-            pis,
-            date: dateKey,
-            records: records,
-            intervaloAlmocoMinutos: 0,
-            intervaloExcedente: 0,
-            tempoTrabalhoTotal: 0,
-            duplicatas: duplicatas,
-            entradaSaida1: entradaSaida1,
-            entradaSaida2: entradaSaida2,
-            missingRecords: missing.length > 0,
-            isFriday
-          });
-        }
-        setLoading(false);
-      });
+                const entrada1Minutos = toMinutes(entrada1.horario);
+                const saida1Minutos = toMinutes(saida1.horario);
+                const entrada2Minutos = toMinutes(entrada2.horario);
+                const saida2Minutos = toMinutes(saida2.horario);
+
+                intervaloAlmocoMinutos = entrada2Minutos - saida1Minutos;
+                tempoTrabalhoTotal = (saida1Minutos - entrada1Minutos) + (saida2Minutos - entrada2Minutos);
+
+                // Ajuste para sexta-feira e outros dias
+                if (isFriday) {
+                    tempoTrabalhoTotal = Math.min(tempoTrabalhoTotal, 480); // Limita a 8 horas (480 minutos) se for sexta-feira
+                } else {
+                    tempoTrabalhoTotal = Math.min(tempoTrabalhoTotal, 540); // Limita a 9 horas (540 minutos) nos outros dias
+                }
+
+                const limite = 70;
+                const intervaloExcedente = Math.max(0, intervaloAlmocoMinutos - limite);
+
+                groupedData.push({
+                    pis,
+                    date: dateKey,
+                    records: [
+                        entrada1,
+                        saida1,
+                        entrada2,
+                        saida2
+                    ],
+                    intervaloAlmocoMinutos,
+                    intervaloExcedente,
+                    tempoTrabalhoTotal,
+                    duplicatas,
+                    entradaSaida1,
+                    entradaSaida2,
+                    missingRecords: missing.length > 0,
+                    dayOfWeek, // Inclui o dia da semana
+                    isFriday
+                });
+            } else {
+                groupedData.push({
+                    pis,
+                    date: dateKey,
+                    records: records,
+                    intervaloAlmocoMinutos: 0,
+                    intervaloExcedente: 0,
+                    tempoTrabalhoTotal: 0,
+                    duplicatas: duplicatas,
+                    entradaSaida1: entradaSaida1,
+                    entradaSaida2: entradaSaida2,
+                    missingRecords: missing.length > 0,
+                    dayOfWeek, // Inclui o dia da semana
+                    isFriday
+                });
+            }
+            setLoading(false);
+        });
     });
 
     setParsedData(groupedData);
-  };
+};
+
 
   const formatTime = (minutes) => {
     if (isNaN(minutes)) return '00:00';
@@ -159,7 +170,6 @@ function App() {
   }, 1000);
 
   };
-
 
   const filteredData = parsedData.filter(item => {
     
@@ -293,9 +303,11 @@ function App() {
                 <td className="info">{formatTime(item.intervaloAlmocoMinutos)}</td>
                 <td className="info">{formatTime(item.tempoTrabalhoTotal)}</td>
                 <td className="info">
-                  {item.duplicatas.map((itens) => (<span>{itens.horario} - {itens.message} <br></br></span>))}
-                  {item.entradaSaida1.map((itens) => (<span>{itens.horario} - {itens.message} <br></br></span>))}
-                  {item.entradaSaida2.map((itens) => (<span>{itens.horario} - {itens.message} <br></br></span>))}
+                  <span>{item.dayOfWeek}</span><br />
+                  {item.duplicatas.map((itens, idx) => (<span key={`dup-${index}-${idx}`}>{itens.horario} - {itens.message} <br></br></span>))}
+                  {item.entradaSaida1.map((itens, idx) => (<span key={`en1-${index}-${idx}`}>{itens.horario} - {itens.message} <br></br></span>))}
+                  {item.entradaSaida2.map((itens, idx) => (<span key={`en2-${index}-${idx}`}>{itens.horario} - {itens.message} <br></br></span>))}
+                  
                   </td>
                 
               </tr>
